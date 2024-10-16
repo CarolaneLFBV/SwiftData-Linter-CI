@@ -1,0 +1,9 @@
+disabled_rules:
+  - line_length
+  - identifier_name
+opt_in_rules:
+  - empty_count
+included:
+  - Source/
+excluded:
+  - Pods/
