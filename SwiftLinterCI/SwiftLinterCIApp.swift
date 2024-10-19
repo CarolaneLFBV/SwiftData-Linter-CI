@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct SwiftLinterCIApp: App {
@@ -13,5 +14,6 @@ struct SwiftLinterCIApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: Book.self)
     }
 }

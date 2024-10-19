@@ -1,26 +1,55 @@
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
-    @State private var name = "SwiftLint Example"
+    @Environment(\.modelContext) var modelContext
+    @Query(sort: [SortDescriptor(\Book.title, order: .reverse)]) var books: [Book]
 
-    // This line exceeds the recommended maximum line length (commonly 100 characters)
-    let longText = "This is an example of a line of text that exceeds the maximum recommended line length for SwiftLint, and should trigger a linting error."
-
+    @State private var showingAddScreen = false
     var body: some View {
-        VStack {
-            Text(name)
-                .padding()
-
-            // Violates the force unwrapping rule (force unwrapping discouraged)
-            let number: Int? = 42
-            Text("Number: \(number!)") // Force unwrapping of an optional
-            
-            // Single letter variable name (violates identifier naming conventions)
-            let a = 100
-            Text("Value of a: \(a)")
-
-            // Violates trailing whitespace rule (extra space at the end of this line)
-            Text("Trailing whitespace here... ")
+        NavigationStack {
+            List {
+                ForEach(books) { book in
+                    NavigationLink(value: book) {
+                        HStack {
+                            EmojiRatingView(rating: book.rating)
+                                .font(.largeTitle)
+                            
+                            VStack(alignment: .leading) {
+                                Text(book.title)
+                                    .font(.headline)
+                                Text(book.author)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                }
+                .onDelete(perform: deleteBooks)
+            }
+            .navigationDestination(for: Book.self) { book in
+                DetailView(book: book)
+            }
+            .navigationTitle("Bookworm")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Add Book", systemImage: "plus") {
+                        showingAddScreen.toggle()
+                    }
+                }
+                ToolbarItem(placement: .topBarLeading) {
+                    EditButton()
+                }
+            }
+            .sheet(isPresented: $showingAddScreen) {
+                AddBookView()
+            }
+        }
+    }
+    
+    func deleteBooks(at offsets: IndexSet) {
+        for offset in offsets {
+            let book = books[offset]
+            modelContext.delete(book)
         }
     }
 }
